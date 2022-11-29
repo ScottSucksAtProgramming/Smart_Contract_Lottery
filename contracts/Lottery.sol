@@ -21,6 +21,7 @@ contract Lottery is VRFConsumerBase, Ownable {
     // Create an array which will hold the address of the people who enter the
     // lottery.
     address payable[] public players;
+    address payable public recentWinner;
     // This variable holds the entry fee for the lottery.
     uint256 public usdEntryFee;
     // This variable will store the address for the Chainlink ETH to USD price feed.
@@ -38,8 +39,10 @@ contract Lottery is VRFConsumerBase, Ownable {
     LOTTERY_STATE public lottery_state;
     uint256 public fee;
     bytes32 public keyhash;
-    address payable public recentWinner;
     uint256 public randomness;
+
+    // Create an event for us to pull later.
+    event RequestedRandomness(bytes32 requestID);
 
     // Since this contract has inherityed functions from the VRFConsumerBase
     // contract we can specify addresses and parameters that are required in
@@ -110,6 +113,7 @@ contract Lottery is VRFConsumerBase, Ownable {
     function endLottery() public onlyOwner {
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
         bytes32 requestID = requestRandomness(keyhash, fee);
+        emit RequestedRandomness(requestID);
     }
 
     // fulFillRandomness is a function build into the VRFConsumer contract which
